@@ -3,6 +3,7 @@
     <Menu/>
     <div class="border-wrap">
       <canvas id="draw"></canvas>
+      <div class="separator"></div>
     </div>
   </v-app>
 </template>
@@ -13,6 +14,11 @@ canvas {
 }
 body {
   touch-action: none;
+}
+.separator{
+  height: 3px;
+  width: 100%;
+  background: linear-gradient(blue,cyan);
 }
 </style>
 
@@ -79,16 +85,13 @@ export default {
       // start from
       ctx.moveTo(lastX, lastY);
       // go to
-      const rect = e.target.getBoundingClientRect();
       if (e.type == "touchmove") {
-        ctx.lineTo(
-          e.targetTouches[0].pageX - rect.left,
-          e.targetTouches[0].pageY - rect.top
-        );
-        [lastX, lastY] = [
-          e.targetTouches[0].pageX - rect.left,
-          e.targetTouches[0].pageY - rect.top
-        ];
+        const rect = e.target.getBoundingClientRect();
+        const x = Math.floor(e.targetTouches[0].pageX) - rect.left;
+        const y = Math.floor(e.targetTouches[0].pageY) - rect.top;
+        console.log(x,y)
+        ctx.lineTo(x,y);
+        [lastX, lastY] = [x,y];
       } else {
         ctx.lineTo(e.offsetX, e.offsetY);
         [lastX, lastY] = [e.offsetX, e.offsetY];
@@ -114,10 +117,9 @@ export default {
       canvas.addEventListener("touchstart", e => {
         isDrawing = true;
         const rect = e.target.getBoundingClientRect();
-        [lastX, lastY] = [
-          e.targetTouches[0].pageX - rect.left,
-          e.targetTouches[0].pageY - rect.top
-        ];
+        const x = Math.floor(e.targetTouches[0].pageX) - rect.left;
+        const y = Math.floor(e.targetTouches[0].pageY) - rect.top;
+        [lastX, lastY] = [x,y];
       });
     } else {
       canvas.addEventListener("mousemove", draw);
