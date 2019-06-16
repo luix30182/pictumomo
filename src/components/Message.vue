@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-flex xs12 sm6 offset-sm2>
+    <v-flex xs12 sm6 offset-sm3 mb-2>
       <v-card>
         <v-list two-line>
           <template>
@@ -12,8 +12,8 @@
               </v-list-tile-avatar>
 
               <v-list-tile-content>
-                <v-list-tile-title v-html="'user'"></v-list-tile-title>
-                <v-list-tile-sub-title v-html="'message'"></v-list-tile-sub-title>
+                <v-list-tile-title v-html="this.message.user"></v-list-tile-title>
+                <v-list-tile-sub-title v-html="this.message.message"></v-list-tile-sub-title>
               </v-list-tile-content>
             </v-list-tile>
           </template>
@@ -25,7 +25,11 @@
 
 <script>
 export default {
-    name:'message'
+    name:'message',
+    props: ['message'],
+    created(){
+      console.log(this.props)
+    }
 }
 </script>
 

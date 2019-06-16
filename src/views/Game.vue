@@ -2,59 +2,17 @@
   <v-app>
     <Menu/>
     <div class="border-wrap">
-      <canvas id="draw" width="800" height="800"></canvas>
+      <canvas id="draw"></canvas>
     </div>
-    <v-container>
-      <v-layout row wrap>
-        <v-flex xs12 md3>
-          <h3>List of players</h3>
-        </v-flex>
-        <v-flex xs12 md8 offset-md1>
-          <div class="border-wrap-chat">
-            <div id="chat">
-              <h3>Hello {{username}}</h3>
-              <Message/>
-              <v-layout row wrap>
-                <v-flex xs12 md8 offset-md2>
-                  <v-text-field v-model="message" outline clearable label="Message" type="text">
-                    <template v-slot:append>
-                      <v-fade-transition leave-absolute>
-                        <v-progress-circular v-if="loading" size="24" color="info" indeterminate></v-progress-circular>
-                        <img
-                          @click="clickMe"
-                          v-else
-                          width="24"
-                          height="24"
-                          src="https://cdn.vuetifyjs.com/images/logos/v-alt.svg"
-                          alt
-                        >
-                      </v-fade-transition>
-                    </template>
-                  </v-text-field>
-                </v-flex>
-              </v-layout>
-            </div>
-          </div>
-        </v-flex>
-      </v-layout>
-    </v-container>
   </v-app>
 </template>
 
 <style scoped>
-.border-wrap {
-  position: relative;
-  background: linear-gradient(to right, blue, cyan);
-}
-.border-wrap-chat {
-  position: relative;
-  background: linear-gradient(to right, blue, cyan);
-  padding-left: 5px;
+canvas {
   width: 100%;
 }
-canvas,
-#chat {
-  background: #fff;
+body {
+  touch-action: none;
 }
 </style>
 
@@ -62,7 +20,7 @@ canvas,
 // @ is an alias to /src
 import Menu from "@/components/Menu";
 import Message from "@/components/Message";
-import router from "../router";
+import io from "socket.io-client";
 
 export default {
   name: "Game",
@@ -75,32 +33,32 @@ export default {
       username: "",
       message: "",
       loading: false,
-      items: [
-        {
-          avatar: "https://cdn.vuetifyjs.com/images/lists/1.jpg",
-          title: "Brunch this weekend?",
-          subtitle:
-            "<span class='text--primary'>Ali Connors</span> &mdash; I'll be in your neighborhood doing errands this weekend. Do you want to hang out?"
-        }
-      ]
+      // socket: io("https://pictumomo.herokuapp.com/"),
+      messages: [],
+      listUsers: []
     };
   },
   methods: {
     clickMe() {
-      this.loading = true;
-      this.message = "Wait for it...";
-      setTimeout(() => {
-        this.loading = false;
-        this.message = "You've clicked me!";
-      }, 2000);
+      this.socket.emit("SEND_MESSAGE", {
+        user: this.username,
+        message: this.message
+      });
+      this.message = "";
     }
   },
   created() {
     this.username = this.$route.params.username;
   },
   mounted() {
-    const chat = document.querySelector("#chat");
-    chat.height = window.innerHeight / 2;
+    // this.socket.on("MESSAGE", data => {
+    //   this.messages = [...this.messages, data];
+    // });
+
+    // this.listUsers = this.messages.map(message => {
+    //   return message.user;
+    // });
+
     const canvas = document.querySelector("#draw");
     const ctx = canvas.getContext("2d");
     canvas.width = window.innerWidth;
@@ -108,8 +66,7 @@ export default {
     ctx.strokeStyle = "#BADA55";
     ctx.lineJoin = "round";
     ctx.lineCap = "round";
-    ctx.lineWidth = 10;
-    // ctx.globalCompositeOperation = 'multiply';
+    ctx.lineWidth = 5;
     let isDrawing = false;
     let lastX = 0;
     let lastY = 0;
@@ -122,9 +79,21 @@ export default {
       // start from
       ctx.moveTo(lastX, lastY);
       // go to
-      ctx.lineTo(e.offsetX, e.offsetY);
+      const rect = e.target.getBoundingClientRect();
+      if (e.type == "touchmove") {
+        ctx.lineTo(
+          e.targetTouches[0].pageX - rect.left,
+          e.targetTouches[0].pageY - rect.top
+        );
+        [lastX, lastY] = [
+          e.targetTouches[0].pageX - rect.left,
+          e.targetTouches[0].pageY - rect.top
+        ];
+      } else {
+        ctx.lineTo(e.offsetX, e.offsetY);
+        [lastX, lastY] = [e.offsetX, e.offsetY];
+      }
       ctx.stroke();
-      [lastX, lastY] = [e.offsetX, e.offsetY];
       hue++;
       if (hue >= 360) {
         hue = 0;
@@ -134,9 +103,29 @@ export default {
       isDrawing = true;
       [lastX, lastY] = [e.offsetX, e.offsetY];
     });
-    canvas.addEventListener("mousemove", draw);
-    canvas.addEventListener("mouseup", () => (isDrawing = false));
-    canvas.addEventListener("mouseout", () => (isDrawing = false));
+
+    const touchAvailable =
+      "createTouch" in document || "ontouchstart" in window;
+
+    if (touchAvailable) {
+      canvas.addEventListener("touchmove", draw, false);
+      canvas.addEventListener("touchstart", () => (isDrawing = false), false);
+      canvas.addEventListener("touchend", () => (isDrawing = false), false);
+      canvas.addEventListener("touchstart", e => {
+        isDrawing = true;
+        const rect = e.target.getBoundingClientRect();
+        [lastX, lastY] = [
+          e.targetTouches[0].pageX - rect.left,
+          e.targetTouches[0].pageY - rect.top
+        ];
+      });
+    } else {
+      canvas.addEventListener("mousemove", draw);
+      canvas.addEventListener("mouseup", () => (isDrawing = false));
+      canvas.addEventListener("mouseout", () => (isDrawing = false));
+    }
+
+    document.body.addEventListener ("touchmove", function (e) { e.preventDefault (); }, {passive: false});
   }
 };
 </script>
