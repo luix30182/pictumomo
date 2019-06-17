@@ -4,13 +4,13 @@
     <v-container>
       <v-form>
         <v-layout row wrap>
-          <v-flex xs12>
+          <v-flex xs12 md6 offset-md3>
             <v-text-field v-model="username" label="Nickname" outline clearable></v-text-field>
           </v-flex>
-          <v-flex xs12>
+          <v-flex xs12 md6 offset-md3>
             <v-text-field v-model="nameRoom" label="Room" outline clearable></v-text-field>
           </v-flex>
-          <v-flex xs12>
+          <v-flex xs12 md6 offset-md3>
             <v-text-field
               v-model="passwordRoom"
               :append-icon="show1 ? 'visibility' : 'visibility_off'"
@@ -21,12 +21,12 @@
               @click:append="show1 = !show1"
             ></v-text-field>
           </v-flex>
-          <v-flex xs12>
+          <v-flex xs12 md6 offset-md3>
             <div class="text-xs-center">
-              <v-btn @click="enterGame" block outline color="indigo">Play!</v-btn>
+              <v-btn @click="enterGame" block outline color="light-blue lighten-1">Play!</v-btn>
             </div>
           </v-flex>
-          <v-flex xs12>
+          <v-flex xs12 md6 offset-md3>
             <v-alert :value="showError" color="error" icon="warning" outline>Password or Room name error</v-alert>
           </v-flex>
         </v-layout>

@@ -4,6 +4,54 @@
     <div class="border-wrap">
       <canvas id="draw"></canvas>
       <div class="separator"></div>
+      <v-container fluid>
+        <v-layout row wrap fluid>
+          <v-flex xs12>
+            <v-list>
+              <v-list-group :prepend-icon="listUsers.action" no-action>
+                <template v-slot:activator>
+                  <v-list-tile>
+                    <v-list-tile-content>
+                      <v-list-tile-title>{{ listUsers.title }}</v-list-tile-title>
+                    </v-list-tile-content>
+                  </v-list-tile>
+                </template>
+                <v-list-tile v-for="user in listUsers.users" :key="user.name">
+                  <v-list-tile-content>
+                    <v-list-tile-title>{{ user.name }}</v-list-tile-title>
+                  </v-list-tile-content>
+                </v-list-tile>
+              </v-list-group>
+            </v-list>
+          </v-flex>
+          <v-flex xs12>
+            <h3>Hello! {{username}}</h3>
+          </v-flex>
+          <v-flex xs12 v-for="(message,i) in messages" :key="i">
+            <Message :message="message"/>
+          </v-flex>
+          <!-- send mesage -->
+          <v-bottom-nav>
+          <v-flex xs12>
+            <v-text-field v-model="message" outline clearable label="Message" type="text">
+              <template v-slot:append>
+                <v-fade-transition leave-absolute>
+                  <v-progress-circular v-if="loading" size="24" color="info" indeterminate></v-progress-circular>
+                  <img
+                    @click="clickMe"
+                    v-else
+                    width="24"
+                    height="24"
+                    src="https://cdn.vuetifyjs.com/images/logos/v-alt.svg"
+                    alt
+                  >
+                </v-fade-transition>
+              </template>
+            </v-text-field>
+          </v-flex>
+          </v-bottom-nav>
+        </v-layout>
+      </v-container>
     </div>
   </v-app>
 </template>
@@ -15,10 +63,16 @@ canvas {
 body {
   touch-action: none;
 }
-.separator{
+.separator {
   height: 3px;
   width: 100%;
-  background: linear-gradient(blue,cyan);
+  background: linear-gradient(blue, cyan);
+}
+.separator-y {
+  display: flex;
+  height: 100%;
+  width: 3px;
+  background: linear-gradient(blue, cyan);
 }
 </style>
 
@@ -27,6 +81,7 @@ body {
 import Menu from "@/components/Menu";
 import Message from "@/components/Message";
 import io from "socket.io-client";
+import router from '../router';
 
 export default {
   name: "Game",
@@ -39,9 +94,14 @@ export default {
       username: "",
       message: "",
       loading: false,
-      // socket: io("https://pictumomo.herokuapp.com/"),
+      socket: io("localhost:3000"),
       messages: [],
-      listUsers: []
+      listUsers: {
+        action: "person",
+        title: "Users playing",
+        users: [
+        ]
+      }
     };
   },
   methods: {
@@ -55,11 +115,14 @@ export default {
   },
   created() {
     this.username = this.$route.params.username;
+    if(this.username == null){
+      router.push({name:'home'});
+    }
   },
   mounted() {
-    // this.socket.on("MESSAGE", data => {
-    //   this.messages = [...this.messages, data];
-    // });
+    this.socket.on("MESSAGE", data => {
+      this.messages = [...this.messages, data];
+    });
 
     // this.listUsers = this.messages.map(message => {
     //   return message.user;
@@ -89,9 +152,8 @@ export default {
         const rect = e.target.getBoundingClientRect();
         const x = Math.floor(e.targetTouches[0].pageX) - rect.left;
         const y = Math.floor(e.targetTouches[0].pageY) - rect.top;
-        console.log(x,y)
-        ctx.lineTo(x,y);
-        [lastX, lastY] = [x,y];
+        ctx.lineTo(x, y);
+        [lastX, lastY] = [x, y];
       } else {
         ctx.lineTo(e.offsetX, e.offsetY);
         [lastX, lastY] = [e.offsetX, e.offsetY];
@@ -119,7 +181,7 @@ export default {
         const rect = e.target.getBoundingClientRect();
         const x = Math.floor(e.targetTouches[0].pageX) - rect.left;
         const y = Math.floor(e.targetTouches[0].pageY) - rect.top;
-        [lastX, lastY] = [x,y];
+        [lastX, lastY] = [x, y];
       });
     } else {
       canvas.addEventListener("mousemove", draw);
@@ -127,7 +189,7 @@ export default {
       canvas.addEventListener("mouseout", () => (isDrawing = false));
     }
 
-    document.body.addEventListener ("touchmove", function (e) { e.preventDefault (); }, {passive: false});
+    // document.body.addEventListener ("touchmove", function (e) { e.preventDefault (); }, {passive: false});
   }
 };
 </script>

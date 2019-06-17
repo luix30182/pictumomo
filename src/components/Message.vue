@@ -1,34 +1,18 @@
 <template>
-  <div>
-    <v-flex xs12 sm6 offset-sm3 mb-2>
-      <v-card>
-        <v-list two-line>
-          <template>
-            <v-list-tile avatar>
-              <v-list-tile-avatar>
-                <img
-                  src="https://png.pngtree.com/element_origin_min_pic/12/03/20/1656e3909271e51.jpg"
-                >
-              </v-list-tile-avatar>
-
-              <v-list-tile-content>
-                <v-list-tile-title v-html="this.message.user"></v-list-tile-title>
-                <v-list-tile-sub-title v-html="this.message.message"></v-list-tile-sub-title>
-              </v-list-tile-content>
-            </v-list-tile>
-          </template>
-        </v-list>
-      </v-card>
+  <v-layout row>
+    <v-flex xs4 sm6 offset-sm3>
+      <h4 class="blue--text">{{message.user}}: </h4>
     </v-flex>
-  </div>
+    <v-flex xs8>
+      <p>{{message.message}}</p>
+    </v-flex>
+  </v-layout>
 </template>
-
 <script>
 export default {
     name:'message',
     props: ['message'],
     created(){
-      console.log(this.props)
     }
 }
 </script>
