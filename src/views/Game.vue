@@ -94,7 +94,7 @@ export default {
       username: "",
       message: "",
       loading: false,
-      socket: io("localhost:3000"),
+      socket: io("https://git.heroku.com/pictumomo-chat.git:3000"),
       messages: [],
       listUsers: {
         action: "person",
