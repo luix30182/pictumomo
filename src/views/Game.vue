@@ -96,8 +96,8 @@ export default {
       username: "",
       message: "",
       loading: false,
-      socket: io("localhost:3000"),
-      // socket: io("https://pictumomo-chat.herokuapp.com/"),
+      // socket: io("localhost:3000"),
+      socket: io("https://pictumomo-chat.herokuapp.com/"),
       messages: [],
       listUsers: {
         action: "person",
@@ -118,9 +118,9 @@ export default {
   },
   created() {
     this.username = this.$route.params.username;
-    // if(this.username == null){
-    //   router.push({name:'home'});
-    // }
+    if(this.username == null){
+      router.push({name:'home'});
+    }
   },
   mounted() {
     this.socket.on("MESSAGE", data => {
